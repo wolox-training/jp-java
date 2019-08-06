@@ -2,7 +2,11 @@ package com.wolox.training.models;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,6 +18,9 @@ import lombok.Setter;
 public class Book {
 
   @Id
+  @Setter(AccessLevel.NONE)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BOOK_SEQ")
+  @SequenceGenerator(name = "BOOK_SEQ", sequenceName = "BOOK_SEQ")
   private Long id;
 
   @Column
