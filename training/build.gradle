@@ -34,4 +34,12 @@ dependencies {
     compile("org.springframework.boot:spring-boot-devtools")
     compile('org.springframework.boot:spring-boot-starter-thymeleaf')
     compile('org.projectlombok:lombok')
+    compile group: 'org.apache.camel', name: 'camel-core', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-spring-boot-starter', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-http4-starter', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-cdi', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-swagger-java', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-jackson', version: "2.24.1"
+    compile group: 'org.apache.camel', name: 'camel-servlet', version: '2.24.1'
+    annotationProcessor "org.projectlombok:lombok:1.18.6"
 }
