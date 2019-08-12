@@ -1,13 +1,13 @@
 package com.wolox.training.route;
 
-import com.wolox.training.dto.BookInputDto;
-import com.wolox.training.dto.BookResponseDto;
-import com.wolox.training.exceptions.BookException;
+import com.wolox.training.exceptions.BookNotFoundException;
+import com.wolox.training.models.Book;
 import com.wolox.training.processor.ErrorProcessor;
 import com.wolox.training.services.BookService;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.cdi.ContextName;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ public class BookRoute extends RouteBuilder {
   @Override
   public void configure() throws Exception {
 
-    onException(BookException.class).handled(true)
+    onException(BookNotFoundException.class).handled(true)
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessor());
 
     restConfiguration()
@@ -43,40 +43,48 @@ public class BookRoute extends RouteBuilder {
         .consumes("application/json")
         .produces("application/json")
 
-        .get("/books").description("allows you to consult all the books")
-        .outType(BookResponseDto[].class)
-        .responseMessage().code(200).message("OK").endResponseMessage()
-        .responseMessage().code(404).message("no books found").endResponseMessage()
-        .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-        .streamCaching().bean(this.bookService, "getAllBook").endRest()
+        .get("/books")
+            .description("allows you to consult all the books")
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(404).message("no books found").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage().route()
+            .streamCaching().bean(this.bookService, "getAllBook")
+            .endRest()
 
-        .get("/books/{id}").description("allows you to search for a book according to id")
-        .outType(BookResponseDto.class)
-        .param().name("id").type(RestParamType.path).description("Id Book")
-        .dataType("long").endParam()
-        .responseMessage().code(200).message("OK").endResponseMessage()
-        .responseMessage().code(404).message("no books found").endResponseMessage()
-        .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-        .streamCaching().bean(this.bookService, "findBookById").endRest()
+        .get("/books/{id}")
+            .description("allows you to search for a book according to id")
+            .param().name("id").type(RestParamType.path).description("Id Book")
+            .dataType("long").endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(404).message("no books found").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage().route()
+            .streamCaching().bean(this.bookService, "findBookById")
+            .endRest()
 
-        .post("/books/create").description("allows you to create a book")
-        .type(BookInputDto.class)
-        .responseMessage().code(200).message("OK").endResponseMessage()
-        .route().streamCaching().bean(this.bookService, "saveBook").endRest()
+        .post("/books")
+            .description("allows you to create a book")
+            .type(Book.class)
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .route().streamCaching().bean(this.bookService, "saveBook")
+            .endRest()
 
-        .delete("/books/{id}").description("allows you to delete a book")
-        .param().name("id").type(RestParamType.path).description("Id Book")
-        .dataType("long").endParam()
-        .responseMessage().code(200).message("OK").endResponseMessage()
-        .responseMessage().code(500).message("error generating query").endResponseMessage()
-        .route().streamCaching().bean(this.bookService, "deleteBook").endRest()
+        .delete("/books/{id}")
+            .description("allows you to delete a book")
+            .param().name("id").type(RestParamType.path).description("Id Book")
+            .dataType("long").endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage()
+            .route().streamCaching().bean(this.bookService, "deleteBook")
+            .endRest()
 
-        .put("/books/{id}").description("allows you to update a book")
-        .param().name("id").type(RestParamType.path).description("Id book")
-        .dataType("integer").endParam()
-        .type(BookInputDto.class)
-        .responseMessage().code(200).message("OK").endResponseMessage()
-        .responseMessage().code(500).message("error generating query").endResponseMessage()
-        .route().streamCaching().bean(this.bookService, "updateBook").endRest();
+        .put("/books/{id}")
+            .description("allows you to update a book")
+            .type(Book.class)
+            .param().name("id").type(RestParamType.path).description("Id book")
+            .dataType("integer").endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage()
+            .route().streamCaching().bean(this.bookService, "updateBook")
+            .endRest();
   }
 }

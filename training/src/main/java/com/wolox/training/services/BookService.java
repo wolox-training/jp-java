@@ -1,19 +1,18 @@
 package com.wolox.training.services;
 
-import com.wolox.training.dto.BookInputDto;
-import com.wolox.training.dto.BookResponseDto;
-import com.wolox.training.exceptions.BookException;
+import com.wolox.training.exceptions.BookNotFoundException;
+import com.wolox.training.models.Book;
 import java.util.List;
 
 public interface BookService {
 
-  List<BookResponseDto> getAllBook();
+  List<Book> getAllBook();
 
-  void saveBook(BookInputDto bookInputDto);
+  void saveBook(Book bookInputDto);
 
-  BookResponseDto findBookById(Long id) throws BookException;
+  Book findBookById(Long id) throws BookNotFoundException;
 
-  void updateBook(Long id, BookInputDto bookInputDto) throws BookException;
+  void updateBook(Long id, Book bookInputDto) throws BookNotFoundException;
 
-  void deleteBook(Long id) throws BookException;
+  void deleteBook(Long id) throws BookNotFoundException;
 }

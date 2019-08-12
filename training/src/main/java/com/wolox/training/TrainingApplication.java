@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ImportResource;
 
 @SpringBootApplication
-@ImportResource({"classpath:spring/camel-context.xml"})
 public class TrainingApplication {
 
   public static void main(String[] args) {

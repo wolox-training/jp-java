@@ -1,8 +1,6 @@
 package com.wolox.training.services.impl;
 
-import com.wolox.training.dto.BookInputDto;
-import com.wolox.training.dto.BookResponseDto;
-import com.wolox.training.exceptions.BookException;
+import com.wolox.training.exceptions.BookNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.repositories.BookRepository;
 import com.wolox.training.services.BookService;
@@ -22,68 +20,53 @@ public class BookServiceImpl implements BookService {
   private BookRepository bookRepository;
 
   @Override
-  public List<BookResponseDto> getAllBook() {
-    return this.bookRepository.findAll().parallelStream().map(BookResponseDto::new).collect(
-        Collectors.toList());
+  public List<Book> getAllBook() {
+    return this.bookRepository.findAll();
   }
 
   @Override
-  public void saveBook(BookInputDto bookInputDto) {
+  public void saveBook(Book bookInput) {
 
-    log.info("saving book..., {}", bookInputDto);
-
-    Book book = new Book();
-    book.setAuthor(bookInputDto.getAuthor());
-    book.setGenre(bookInputDto.getGenre());
-    book.setImage(bookInputDto.getImage());
-    book.setIsbn(bookInputDto.getIsbn());
-    book.setPages(bookInputDto.getPages());
-    book.setPublisher(bookInputDto.getPublisher());
-    book.setSubtitle(bookInputDto.getSubtitle());
-    book.setTitle(bookInputDto.getTitle());
-    book.setYear(book.getYear());
-
-    this.bookRepository.save(book);
+    log.info("saving book..., {}", bookInput);
+    this.bookRepository.save(bookInput);
   }
 
   @Override
-  public BookResponseDto findBookById(@Header("id") Long id) throws BookException {
+  public Book findBookById(@Header("id") Long id) throws BookNotFoundException {
     Optional<Book> book = this.bookRepository.findById(id);
     if (book.isPresent()) {
-      return new BookResponseDto(book.get());
+      return book.get();
     } else {
-      throw new BookException("Book not found", 404);
+      throw new BookNotFoundException("Book not found", 404);
     }
   }
 
   @Override
-  public void updateBook(@Header("id") Long id, BookInputDto bookInputDto) throws BookException {
+  public void updateBook(@Header("id") Long id, Book bookInput) throws BookNotFoundException {
     Optional<Book> book = this.bookRepository.findById(id);
     if (book.isPresent()) {
       Book bookUpdate = book.get();
-      bookUpdate.setYear(bookInputDto.getYear());
-      bookUpdate.setTitle(bookInputDto.getTitle());
-      bookUpdate.setSubtitle(bookInputDto.getSubtitle());
-      bookUpdate.setPublisher(bookInputDto.getPublisher());
-      bookUpdate.setPages(bookInputDto.getPages());
-      bookUpdate.setIsbn(bookInputDto.getIsbn());
-      bookUpdate.setGenre(bookInputDto.getGenre());
-      bookUpdate.setImage(bookInputDto.getImage());
+      bookUpdate.setYear(bookInput.getYear());
+      bookUpdate.setTitle(bookInput.getTitle());
+      bookUpdate.setSubtitle(bookInput.getSubtitle());
+      bookUpdate.setPublisher(bookInput.getPublisher());
+      bookUpdate.setPages(bookInput.getPages());
+      bookUpdate.setIsbn(bookInput.getIsbn());
+      bookUpdate.setGenre(bookInput.getGenre());
+      bookUpdate.setImage(bookInput.getImage());
       this.bookRepository.save(bookUpdate);
     } else {
-      throw new BookException("Book not found", 404);
+      throw new BookNotFoundException("Book not found", 404);
     }
-
-
   }
 
   @Override
-  public void deleteBook(@Header("id") Long id) throws BookException {
+  public void deleteBook(@Header("id") Long id) throws BookNotFoundException {
     Optional<Book> book = this.bookRepository.findById(id);
     if (book.isPresent()) {
       this.bookRepository.delete(book.get());
     } else {
-      throw new BookException("Book not found", 404);
+      throw new BookNotFoundException("Book not found", 404);
     }
   }
 }
