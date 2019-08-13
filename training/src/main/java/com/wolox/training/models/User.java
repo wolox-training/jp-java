@@ -7,11 +7,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import lombok.AccessLevel;
@@ -40,8 +44,11 @@ public class User {
   @Column(nullable = false)
   private LocalDate birthdate;
 
-  @OneToMany(mappedBy = "user")
-  private List<Book> books;
+  @ManyToMany(cascade = CascadeType.ALL)
+  @JoinTable(name = "user_book",
+  joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
+  inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
+  private List<Book> books = new ArrayList<>();
 
   public List<Book> getBooks() {
     return (List<Book>) Collections.unmodifiableList(books);
@@ -52,9 +59,6 @@ public class User {
   }
 
   public void addBook(Book book) throws BookAlreadyOwnedException, BookNotFoundException {
-    if (books == null) {
-      books = new ArrayList<Book>();
-    }
 
     if (book == null) {
       throw new BookNotFoundException("the book cannot be null", 404);
@@ -62,7 +66,6 @@ public class User {
     if (this.books.contains(book)) {
       throw new BookAlreadyOwnedException("the user has already added this book to his list", 404);
     }
-    book.setUser(this);
     books.add(book);
   }
 
