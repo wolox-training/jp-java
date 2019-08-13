@@ -78,7 +78,7 @@ public class UserServiceImpl implements UserService {
       throw new UserNotFoundException("User not found", 404);
     }
     Optional<Book> book = this.bookRepository.findById(idBook);
-    if (book.isPresent()) {
+    if (!book.isPresent()) {
       throw new BookNotFoundException("Book not found", 404);
     }
     user.get().removeBook(book.get());
