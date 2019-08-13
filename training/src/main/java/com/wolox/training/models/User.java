@@ -26,7 +26,6 @@ import lombok.Setter;
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class User {
 
   @Id
@@ -44,11 +43,12 @@ public class User {
   @Column(nullable = false)
   private LocalDate birthdate;
 
-  @ManyToMany(cascade = CascadeType.ALL)
-  @JoinTable(name = "user_book",
-  joinColumns = @JoinColumn(name = "book_id", referencedColumnName = "id"),
-  inverseJoinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"))
-  private List<Book> books = new ArrayList<>();
+  public User() {
+    this.books = new ArrayList<>();
+  }
+
+  @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+  private List<Book> books;
 
   public List<Book> getBooks() {
     return (List<Book>) Collections.unmodifiableList(books);
