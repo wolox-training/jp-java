@@ -38,49 +38,36 @@ public class UserServiceImpl implements UserService {
 
   @Override
   public User findUserById(Long id) throws UserNotFoundException {
-    Optional<User> user = this.userRepository.findById(id);
-    if (user.isPresent()) {
+    Optional<User> user = Optional.ofNullable(this.userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException("User not found", 404)));
       return user.get();
-    } else {
-      throw new UserNotFoundException("User not found", 404);
-    }
   }
 
   @Override
   public void updateUser(Long id, User userInput) throws UserNotFoundException {
-    Optional<User> user = this.userRepository.findById(id);
-    if (user.isPresent()) {
+    Optional<User> user = Optional.ofNullable(this.userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException("User not found", 404)));
       User userUpdate = user.get();
       userUpdate.setBirthdate(userInput.getBirthdate());
       userUpdate.setName(userInput.getName());
       userUpdate.setUsername(userInput.getUsername());
       this.userRepository.save(userUpdate);
-    } else {
-      throw new UserNotFoundException("User not found", 404);
-    }
   }
 
   @Override
   public void deleteUser(Long id) throws UserNotFoundException {
-    Optional<User> user = this.userRepository.findById(id);
-    if (user.isPresent()) {
+    Optional<User> user = Optional.ofNullable(this.userRepository.findById(id)
+        .orElseThrow(() -> new UserNotFoundException("User not found", 404)));
       this.userRepository.delete(user.get());
-    } else {
-      throw new UserNotFoundException("User not found", 404);
-    }
   }
 
   @Override
   public void deleteBook(Long idUser, Long idBook)
       throws UserNotFoundException, BookNotFoundException {
-    Optional<User> user = this.userRepository.findById(idUser);
-    if (!user.isPresent()) {
-      throw new UserNotFoundException("User not found", 404);
-    }
-    Optional<Book> book = this.bookRepository.findById(idBook);
-    if (!book.isPresent()) {
-      throw new BookNotFoundException("Book not found", 404);
-    }
+    Optional<User> user = Optional.ofNullable(this.userRepository.findById(idUser)
+        .orElseThrow(() -> new UserNotFoundException("User not found", 404)));
+    Optional<Book> book = Optional.ofNullable(this.bookRepository.findById(idBook)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404)));
     user.get().removeBook(book.get());
     this.userRepository.save(user.get());
   }
@@ -88,14 +75,10 @@ public class UserServiceImpl implements UserService {
   @Override
   public void addBook(Long idUser, Long idBook)
       throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException {
-    Optional<User> user = this.userRepository.findById(idUser);
-    if (!user.isPresent()) {
-      throw new UserNotFoundException("User not found", 404);
-    }
-    Optional<Book> book = this.bookRepository.findById(idBook);
-    if (book.isPresent()) {
-      throw new BookNotFoundException("Book not found", 404);
-    }
+    Optional<User> user = Optional.ofNullable(this.userRepository.findById(idUser)
+        .orElseThrow(() -> new UserNotFoundException("User not found", 404)));
+    Optional<Book> book = Optional.ofNullable(this.bookRepository.findById(idBook)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404)));
     user.get().addBook(book.get());
     this.userRepository.save(user.get());
   }
