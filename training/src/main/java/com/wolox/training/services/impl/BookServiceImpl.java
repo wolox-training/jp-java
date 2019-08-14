@@ -6,7 +6,6 @@ import com.wolox.training.repositories.BookRepository;
 import com.wolox.training.services.BookService;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Header;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,40 +32,29 @@ public class BookServiceImpl implements BookService {
 
   @Override
   public Book findBookById(@Header("id") Long id) throws BookNotFoundException {
-    Optional<Book> book = this.bookRepository.findById(id);
-    if (book.isPresent()) {
-      return book.get();
-    } else {
-      throw new BookNotFoundException("Book not found", 404);
-    }
+    return this.bookRepository.findById(id)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
   }
 
   @Override
   public void updateBook(@Header("id") Long id, Book bookInput) throws BookNotFoundException {
-    Optional<Book> book = this.bookRepository.findById(id);
-    if (book.isPresent()) {
-      Book bookUpdate = book.get();
-      bookUpdate.setYear(bookInput.getYear());
-      bookUpdate.setTitle(bookInput.getTitle());
-      bookUpdate.setSubtitle(bookInput.getSubtitle());
-      bookUpdate.setPublisher(bookInput.getPublisher());
-      bookUpdate.setPages(bookInput.getPages());
-      bookUpdate.setIsbn(bookInput.getIsbn());
-      bookUpdate.setGenre(bookInput.getGenre());
-      bookUpdate.setImage(bookInput.getImage());
-      this.bookRepository.save(bookUpdate);
-    } else {
-      throw new BookNotFoundException("Book not found", 404);
-    }
+    Book book = this.bookRepository.findById(id)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
+    book.setYear(bookInput.getYear());
+    book.setTitle(bookInput.getTitle());
+    book.setSubtitle(bookInput.getSubtitle());
+    book.setPublisher(bookInput.getPublisher());
+    book.setPages(bookInput.getPages());
+    book.setIsbn(bookInput.getIsbn());
+    book.setGenre(bookInput.getGenre());
+    book.setImage(bookInput.getImage());
+    this.bookRepository.save(book);
   }
 
   @Override
   public void deleteBook(@Header("id") Long id) throws BookNotFoundException {
-    Optional<Book> book = this.bookRepository.findById(id);
-    if (book.isPresent()) {
-      this.bookRepository.delete(book.get());
-    } else {
-      throw new BookNotFoundException("Book not found", 404);
-    }
+    Book book = this.bookRepository.findById(id)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
+    this.bookRepository.delete(book);
   }
 }
