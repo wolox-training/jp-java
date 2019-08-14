@@ -1,5 +1,6 @@
 package com.wolox.training.models;
 
+import com.google.common.base.Preconditions;
 import com.wolox.training.exceptions.BookAlreadyOwnedException;
 import com.wolox.training.exceptions.BookNotFoundException;
 import java.time.LocalDate;
@@ -72,5 +73,20 @@ public class User {
       throw new BookNotFoundException("the book cannot be null", 404);
     }
     books.remove(book);
+  }
+
+  public void setUsername(String username) {
+    Preconditions.checkNotNull(username, "the username for a book cannot be null and void" );
+    this.username = username;
+  }
+
+  public void setName(String name) {
+    Preconditions.checkNotNull(name, "the name for a book cannot be null and void" );
+    this.name = name;
+  }
+
+  public void setBirthdate(LocalDate birthdate) {
+    Preconditions.checkNotNull(birthdate, "the birthdate for a book cannot be null and void" );
+    this.birthdate = birthdate;
   }
 }
