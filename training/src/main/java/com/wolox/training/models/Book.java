@@ -58,55 +58,55 @@ public class Book {
   private List<User> user;
 
   public void setGenre(String genre) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(genre != null && !genre.isEmpty(),
         "the genre " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.genre = genre;
   }
 
   public void setAuthor(String author) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(author != null && !author.isEmpty(),
         "the author " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.author = author;
   }
 
   public void setImage(String image) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(image != null && !image.isEmpty(),
         "the image " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.image = image;
   }
 
   public void setTitle(String title) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(title != null && !title.isEmpty(),
         "the title " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.title = title;
   }
 
   public void setSubtitle(String subtitle) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(subtitle != null && !subtitle.isEmpty(),
         "the subtitle " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.subtitle = subtitle;
   }
 
   public void setPublisher(String publisher) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(publisher != null && !publisher.isEmpty(),
         "the publisher " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.publisher = publisher;
   }
 
   public void setYear(String year) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(year != null && !year.isEmpty(),
         "the year " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.year = year;
   }
 
   public void setPages(Integer pages) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(pages != null && pages > 0,
         "the pages " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.pages = pages;
   }
 
   public void setIsbn(String isbn) {
-    Preconditions.checkNotNull(genre,
+    Preconditions.checkArgument(isbn != null && !isbn.isEmpty(),
         "the isbn " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);
     this.isbn = isbn;
   }

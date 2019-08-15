@@ -76,19 +76,19 @@ public class User {
   }
 
   public void setUsername(String username) {
-    Preconditions.checkNotNull(username,
+    Preconditions.checkArgument(username != null && !username.isEmpty(),
         "the username " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
     this.username = username;
   }
 
   public void setName(String name) {
-    Preconditions.checkNotNull(name,
+    Preconditions.checkArgument(name != null && !name.isEmpty(),
         "the name " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
     this.name = name;
   }
 
   public void setBirthdate(LocalDate birthdate) {
-    Preconditions.checkNotNull(birthdate,
+    Preconditions.checkArgument(name != null && !name.isEmpty(),
         "the birthdate " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
     this.birthdate = birthdate;
   }
