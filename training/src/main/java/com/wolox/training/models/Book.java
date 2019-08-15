@@ -1,5 +1,7 @@
 package com.wolox.training.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -7,22 +9,18 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.SequenceGenerator;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Book {
 
   @Id
   @Setter(AccessLevel.NONE)
-  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BOOK_SEQ")
-  @SequenceGenerator(name = "BOOK_SEQ", sequenceName = "BOOK_SEQ")
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
   @Column
@@ -52,6 +50,11 @@ public class Book {
   @Column(nullable = false)
   private String isbn;
 
+  @JsonIgnore
   @ManyToMany(mappedBy = "books")
   private List<User> user;
+
+  public Book() {
+    this.user = new ArrayList<>();
+  }
 }
