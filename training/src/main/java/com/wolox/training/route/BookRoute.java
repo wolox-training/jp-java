@@ -31,9 +31,8 @@ public class BookRoute extends RouteBuilder {
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessor());
 
     restConfiguration()
+
         .bindingMode(RestBindingMode.json)
-        .apiContextPath("/api")
-        .contextPath("/rest")
         .apiContextPath("/api")
         .contextPath("/rest")
         .apiProperty("host", "")
