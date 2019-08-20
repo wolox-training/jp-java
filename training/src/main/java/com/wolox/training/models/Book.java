@@ -9,6 +9,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.SequenceGenerator;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,7 +21,8 @@ public class Book {
 
   @Id
   @Setter(AccessLevel.NONE)
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BOOK_SEQ")
+  @SequenceGenerator(name = "BOOK_SEQ", sequenceName = "book_id_seq", allocationSize = 1)
   private Long id;
 
   @Column
