@@ -1,8 +1,10 @@
 package com.wolox.training.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.google.common.base.Preconditions;
 import com.wolox.training.exceptions.BookAlreadyOwnedException;
 import com.wolox.training.exceptions.BookNotFoundException;
+import com.wolox.training.utils.AppConstants;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,5 +75,23 @@ public class User {
       throw new BookNotFoundException("the book cannot be null", 404);
     }
     books.remove(book);
+  }
+
+  public void setUsername(String username) {
+    Preconditions.checkArgument(username != null && !username.isEmpty(),
+        "the username " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
+    this.username = username;
+  }
+
+  public void setName(String name) {
+    Preconditions.checkArgument(name != null && !name.isEmpty(),
+        "the name " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
+    this.name = name;
+  }
+
+  public void setBirthdate(LocalDate birthdate) {
+    Preconditions.checkArgument(name != null && !name.isEmpty(),
+        "the birthdate " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
+    this.birthdate = birthdate;
   }
 }
