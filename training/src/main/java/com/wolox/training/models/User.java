@@ -1,5 +1,6 @@
 package com.wolox.training.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.base.Preconditions;
 import com.wolox.training.exceptions.BookAlreadyOwnedException;
 import com.wolox.training.exceptions.BookNotFoundException;
@@ -30,7 +31,7 @@ public class User {
   @Id
   @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_SEQ")
-  @SequenceGenerator(name = "USER_SEQ", sequenceName = "USER_SEQ")
+  @SequenceGenerator(name = "USER_SEQ", sequenceName = "users_id_seq", allocationSize = 1)
   private Long id;
 
   @Column(nullable = false)
@@ -46,6 +47,7 @@ public class User {
     this.books = new ArrayList<>();
   }
 
+  @JsonIgnore
   @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
   private List<Book> books;
 

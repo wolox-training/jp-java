@@ -10,9 +10,12 @@ import com.wolox.training.repositories.UserRepository;
 import com.wolox.training.services.UserService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Header;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+@Transactional
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
@@ -36,13 +39,13 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public User findUserById(Long id) throws UserNotFoundException {
+  public User findUserById(@Header("id") Long id) throws UserNotFoundException {
     return this.userRepository.findById(id)
         .orElseThrow(() -> new UserNotFoundException("User not found", 404));
   }
 
   @Override
-  public void updateUser(Long id, User userInput) throws UserNotFoundException {
+  public void updateUser(@Header("id") Long id, User userInput) throws UserNotFoundException {
     User user = this.userRepository.findById(id)
         .orElseThrow(() -> new UserNotFoundException("User not found", 404));
     user.setBirthdate(userInput.getBirthdate());
@@ -52,14 +55,14 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void deleteUser(Long id) throws UserNotFoundException {
+  public void deleteUser(@Header("id") Long id) throws UserNotFoundException {
     User user = this.userRepository.findById(id)
         .orElseThrow(() -> new UserNotFoundException("User not found", 404));
     this.userRepository.delete(user);
   }
 
   @Override
-  public void deleteBook(Long idUser, Long idBook)
+  public void deleteBook(@Header("iduser") Long idUser,@Header("idbook") Long idBook)
       throws UserNotFoundException, BookNotFoundException {
     User user = this.userRepository.findById(idUser)
         .orElseThrow(() -> new UserNotFoundException("User not found", 404));
@@ -70,7 +73,7 @@ public class UserServiceImpl implements UserService {
   }
 
   @Override
-  public void addBook(Long idUser, Long idBook)
+  public void addBook(@Header("iduser") Long idUser, @Header("idbook") Long idBook)
       throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException {
     User user = this.userRepository.findById(idUser)
         .orElseThrow(() -> new UserNotFoundException("User not found", 404));

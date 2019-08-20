@@ -1,5 +1,7 @@
 package com.wolox.training.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
 import com.google.common.base.Preconditions;
 import com.wolox.training.utils.AppConstants;
 import java.util.List;
@@ -12,19 +14,17 @@ import javax.persistence.ManyToMany;
 import javax.persistence.SequenceGenerator;
 import lombok.AccessLevel;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Getter
 @Setter
-@NoArgsConstructor
 public class Book {
 
   @Id
   @Setter(AccessLevel.NONE)
   @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "BOOK_SEQ")
-  @SequenceGenerator(name = "BOOK_SEQ", sequenceName = "BOOK_SEQ")
+  @SequenceGenerator(name = "BOOK_SEQ", sequenceName = "book_id_seq", allocationSize = 1)
   private Long id;
 
   @Column
@@ -54,9 +54,13 @@ public class Book {
   @Column(nullable = false)
   private String isbn;
 
+  @JsonIgnore
   @ManyToMany(mappedBy = "books")
   private List<User> user;
 
+  public Book() {
+    this.user = new ArrayList<>();
+  }
   public void setGenre(String genre) {
     Preconditions.checkArgument(genre != null && !genre.isEmpty(),
         "the genre " + AppConstants.PRECONDITION_BOOK_MESSAGE_NULL);

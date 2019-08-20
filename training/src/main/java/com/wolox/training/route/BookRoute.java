@@ -1,9 +1,11 @@
 package com.wolox.training.route;
 
 import com.wolox.training.exceptions.BookNotFoundException;
+import com.wolox.training.exceptions.UserNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
-import com.wolox.training.processor.ErrorProcessor;
+import com.wolox.training.processor.ErrorProcessorBook;
+import com.wolox.training.processor.ErrorProcessorUser;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
 import org.apache.camel.Exchange;
@@ -28,7 +30,10 @@ public class BookRoute extends RouteBuilder {
   public void configure() throws Exception {
 
     onException(BookNotFoundException.class).handled(true)
-        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessor());
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessorBook());
+
+    onException(UserNotFoundException.class).handled(true)
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessorUser());
 
     restConfiguration()
 
@@ -118,7 +123,7 @@ public class BookRoute extends RouteBuilder {
         .delete("/users/{id}")
             .description("allows you to delete an user")
             .param().name("id").type(RestParamType.path).description("Id User")
-            .dataType("long").endParam()
+            .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.userService, "deleteUser")
@@ -128,7 +133,7 @@ public class BookRoute extends RouteBuilder {
             .description("allows you to update an user")
             .type(User.class)
             .param().name("id").type(RestParamType.path).description("Id User")
-            .dataType("integer").endParam()
+            .dataType("long").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.userService, "updateUser")
