@@ -31,4 +31,49 @@ public class UserControllerTest {
     System.out.println(message.getBody());
     assertThat(4).isEqualTo(((List<User>)message.getBody()).size());
   }
+
+  @Test
+  public void testUser() {
+    Exchange exchange = new DefaultExchange(camelContext);
+    Message in = new DefaultMessage(camelContext);
+    in.setHeader("id", 4);
+    exchange.setIn(in);
+    exchange = camelContext.createProducerTemplate().send("direct:usersearch", exchange);
+    Message message = exchange.getIn();
+    assertThat(4l).isEqualTo(((User)message.getBody()).getId());
+  }
+
+  @Test
+  public void saveUser() {
+    User user = new User();
+    user.setName("Jhovanny");
+    user.setUsername("jhovannywolox");
+    user.setBirthdate(LocalDate.of(1986, 3, 19));
+    Exchange exchange = new DefaultExchange(camelContext);
+    Message in = new DefaultMessage(camelContext);
+    in.setBody(user);
+    exchange.setIn(in);
+    exchange = camelContext.createProducerTemplate().send("direct:saveUser", exchange);
+    Message message = exchange.getIn();
+    User UserSaved = (User)message.getBody();
+    Message inDb = new DefaultMessage(camelContext);
+    inDb.setHeader("id", user.getId());
+    exchange.setIn(inDb);
+    exchange = camelContext.createProducerTemplate().send("direct:usersearch", exchange);
+    Message messageDb = exchange.getIn();
+    assertThat(user.getId()).isEqualTo(((User)messageDb.getBody()).getId());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void userNotSave() {
+    User user = new User();
+    user.setUsername("test");
+    user.setName(null);
+    user.setBirthdate(null);
+    Exchange exchange = new DefaultExchange(camelContext);
+    Message in = new DefaultMessage(camelContext);
+    in.setBody(user);
+    exchange.setIn(in);
+    exchange = camelContext.createProducerTemplate().send("direct:saveUser", exchange);
+  }
 }

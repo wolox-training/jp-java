@@ -56,7 +56,7 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no books found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().inOut("direct:books")
+            .streamCaching().bean(this.bookService, "getAllBook")
             .endRest()
 
         .get("/books/{id}")
@@ -100,7 +100,7 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no users found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().inOut("direct:users")
+            .streamCaching().bean(this.userService, "getAllUser")
             .endRest()
 
         .get("/users/{id}")
@@ -117,7 +117,7 @@ public class BookRoute extends RouteBuilder {
             .description("allows you to create an user ")
             .type(User.class)
             .responseMessage().code(200).message("OK").endResponseMessage()
-            .route().streamCaching().inOut("direct:users")
+            .route().streamCaching().bean(this.userService, "saveUser")
             .endRest()
 
         .delete("/users/{id}")
@@ -163,6 +163,10 @@ public class BookRoute extends RouteBuilder {
 
         from("direct:users").bean(this.userService, "getAllUser");
         from("direct:books").bean(this.bookService, "getAllBook");
-        from("direct:user").bean(this.userService, "saveUser");
+        from("direct:booksearch").bean(this.bookService, "findBookById");
+        from("direct:updatebook").bean(this.bookService, "updateBook");
+        from("direct:savebook").bean(this.bookService, "saveBook");
+        from("direct:saveUser").bean(this.userService, "saveUser");
+        from("direct:usersearch").bean(this.userService, "findUserById");
   }
 }
