@@ -56,7 +56,7 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no books found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.bookService, "getAllBook")
+            .streamCaching().inOut("direct:books")
             .endRest()
 
         .get("/books/{id}")
@@ -100,7 +100,7 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no users found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.userService, "getAllUser")
+            .streamCaching().inOut("direct:users")
             .endRest()
 
         .get("/users/{id}")
@@ -117,7 +117,7 @@ public class BookRoute extends RouteBuilder {
             .description("allows you to create an user ")
             .type(User.class)
             .responseMessage().code(200).message("OK").endResponseMessage()
-            .route().streamCaching().bean(this.userService, "saveUser")
+            .route().streamCaching().inOut("direct:users")
             .endRest()
 
         .delete("/users/{id}")
@@ -160,5 +160,9 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.userService, "deleteBook")
             .endRest();
+
+        from("direct:users").bean(this.userService, "getAllUser");
+        from("direct:books").bean(this.bookService, "getAllBook");
+        from("direct:user").bean(this.userService, "saveUser");
   }
 }
