@@ -58,4 +58,9 @@ public class BookServiceImpl implements BookService {
         .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
     this.bookRepository.delete(book);
   }
+
+  @Override
+  public Book findBookByIsbn(@Header("isbn") String isbn) {
+    return this.bookRepository.findByIsbn(isbn);
+  }
 }
