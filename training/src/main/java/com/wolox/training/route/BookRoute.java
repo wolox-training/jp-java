@@ -275,7 +275,6 @@ public class BookRoute extends RouteBuilder {
           public void process(Exchange exchange) throws Exception {
             exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
             exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, 404);
-            exchange.getIn().setBody("Not found");
           }
         }).end();
   }
