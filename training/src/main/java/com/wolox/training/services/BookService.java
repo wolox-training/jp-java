@@ -15,4 +15,6 @@ public interface BookService {
   void updateBook(Long id, Book bookInputDto) throws BookNotFoundException;
 
   void deleteBook(Long id) throws BookNotFoundException;
+
+  Book findBookByIsbn(String isbn) throws BookNotFoundException;
 }
