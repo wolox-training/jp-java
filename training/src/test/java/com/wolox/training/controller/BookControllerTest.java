@@ -2,14 +2,13 @@ package com.wolox.training.controller;
 
 import static org.assertj.core.api.Assertions.*;
 import com.wolox.training.models.Book;
-import com.wolox.training.models.User;
-import java.util.List;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +21,10 @@ public class BookControllerTest {
   @Autowired
   private CamelContext camelContext;
 
+  private Book book;
+
   @Test
   public void testBook() {
-    Book book = getBook();
     Exchange exchange = new DefaultExchange(camelContext);
     Message in = new DefaultMessage(camelContext);
     in.setBody(book);
@@ -40,7 +40,6 @@ public class BookControllerTest {
 
   @Test
   public void saveBook() {
-    Book book = getBook();
     Exchange exchange = new DefaultExchange(camelContext);
     Message in = new DefaultMessage(camelContext);
     in.setBody(book);
@@ -51,8 +50,9 @@ public class BookControllerTest {
     assertThat(bookSaved.getId()).isNotNull();
   }
 
-  Book getBook(){
-    Book book = new Book();
+  @Before
+  public void getBook(){
+    book = new Book();
     book.setGenre("thriller");
     book.setIsbn("1245454");
     book.setPages(200);
@@ -62,6 +62,5 @@ public class BookControllerTest {
     book.setAuthor("wolox");
     book.setTitle("Front end basics");
     book.setImage("image/frotn.png");
-    return book;
   }
 }

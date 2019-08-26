@@ -8,6 +8,7 @@ import org.apache.camel.Message;
 import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.impl.DefaultMessage;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,10 @@ public class UserControllerTest {
   @Autowired
   private CamelContext camelContext;
 
+  private User user;
+
   @Test
   public void testUser() {
-    User user = getUser();
     Exchange exchange = new DefaultExchange(camelContext);
     Message in = new DefaultMessage(camelContext);
     in.setBody(user);
@@ -40,7 +42,6 @@ public class UserControllerTest {
 
   @Test
   public void saveUser() {
-    User user = getUser();
     Exchange exchange = new DefaultExchange(camelContext);
     Message in = new DefaultMessage(camelContext);
     in.setBody(user);
@@ -53,7 +54,6 @@ public class UserControllerTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void userNotSave() {
-    User user = new User();
     user.setUsername("test");
     user.setName(null);
     user.setBirthdate(null);
@@ -64,11 +64,11 @@ public class UserControllerTest {
     exchange = camelContext.createProducerTemplate().send("direct:saveUser", exchange);
   }
 
-  User getUser() {
-    User user = new User();
+  @Before
+  public void getUser() {
+    user = new User();
     user.setName("Jhovanny");
     user.setUsername("jhovannywolox");
     user.setBirthdate(LocalDate.of(1986, 3, 19));
-    return user;
   }
 }
