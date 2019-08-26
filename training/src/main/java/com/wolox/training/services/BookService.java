@@ -16,5 +16,5 @@ public interface BookService {
 
   void deleteBook(Long id) throws BookNotFoundException;
 
-  Book findBookByIsbn(String isbn);
+  Book findBookByIsbn(String isbn) throws BookNotFoundException;
 }

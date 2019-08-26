@@ -60,7 +60,8 @@ public class BookServiceImpl implements BookService {
   }
 
   @Override
-  public Book findBookByIsbn(@Header("isbn") String isbn) {
-    return this.bookRepository.findByIsbn(isbn);
+  public Book findBookByIsbn(@Header("isbn") String isbn) throws BookNotFoundException {
+    return this.bookRepository.findByIsbn(isbn)
+        .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
   }
 }

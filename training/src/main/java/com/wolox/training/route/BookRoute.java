@@ -1,21 +1,17 @@
 package com.wolox.training.route;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.wolox.training.dto.BookDto;
 import com.wolox.training.exceptions.BookNotFoundException;
 import com.wolox.training.exceptions.UserNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
+import com.wolox.training.processor.BookResponseProcessor;
 import com.wolox.training.processor.ErrorProcessorBook;
 import com.wolox.training.processor.ErrorProcessorUser;
+import com.wolox.training.processor.SaveBookprocessor;
+import com.wolox.training.processor.BookOpenLibraryProcessor;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
 import com.wolox.training.utils.AppConstants;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
@@ -35,6 +31,15 @@ public class BookRoute extends RouteBuilder {
   @Autowired
   private UserService userService;
 
+  @Autowired
+  private BookOpenLibraryProcessor bookOpenLibraryProcessor;
+
+  @Autowired
+  private SaveBookprocessor saveBookprocessor;
+
+  @Autowired
+  private BookResponseProcessor bookResponseProcessor;
+
   @Override
   public void configure() throws Exception {
 
@@ -43,10 +48,6 @@ public class BookRoute extends RouteBuilder {
 
     onException(UserNotFoundException.class).handled(true)
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessorUser());
-
-    ObjectMapper maper = new ObjectMapper();
-    maper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-
 
     restConfiguration()
 
@@ -190,17 +191,7 @@ public class BookRoute extends RouteBuilder {
                     .to("direct:resultsearchbook")
             .end().endRest();
 
-        from("direct:resultsearchbook").streamCaching().process(new Processor() {
-          @Override
-          public void process(Exchange exchange) throws Exception {
-            Book book = (Book) exchange.getIn().getBody();
-            BookDto bookInput = new BookDto(book);
-            bookInput.setAuthors(Arrays.asList(book.getAuthor().split(",")));
-            exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
-            exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, 200);
-            exchange.getIn().setBody(bookInput);
-          }
-        }).end();
+        from("direct:resultsearchbook").streamCaching().process(bookResponseProcessor).end();
 
         from("direct:createbook")
             .setHeader(Exchange.HTTP_QUERY, simple("bibkeys=ISBN:${header.isbn}&format=json&jscmd=data"))
@@ -216,59 +207,10 @@ public class BookRoute extends RouteBuilder {
             .end().endRest();
 
         from("direct:saveopenlibrary")
-            .process(new Processor() {
-              @Override
-              public void process(Exchange exchange) throws Exception {
-                String isbn = (String)exchange.getProperty("isbnbook");
-                JsonNode jsonNode = maper.readTree((String)exchange.getIn().getBody());
-                JsonNode bookOpen = jsonNode.get("ISBN:" + isbn);
-                Book book = new Book();
-                book.setIsbn(isbn);
-                book.setTitle(bookOpen.get("title").textValue());
-                if (bookOpen.findValue("subtitle") != null)
-                {
-                  book.setSubtitle(bookOpen.get("subtitle").textValue());
-                }
-                else {
-                  book.setSubtitle(bookOpen.get("title").textValue());
-                }
-                book.setYear(bookOpen.get("publish_date").textValue());
-                book.setPages(bookOpen.get("number_of_pages").intValue());
-                JsonNode authors = bookOpen.get("authors");
-                List<String> authorsOpen = new ArrayList<>();
-                for (JsonNode publisher: authors
-                ) {
-                  authorsOpen.add(publisher.get("name").textValue());
-                }
-                book.setAuthor(String.join(",", authorsOpen));
-                JsonNode publishers = bookOpen.get("publishers");
-                String publish = "";
-                for (JsonNode publisher: publishers
-                ) {
-                  publish += (publisher.get("name").textValue() + "-");
-                }
-                JsonNode jsonNodeImage = bookOpen.get("cover");
-                book.setImage(jsonNodeImage.get("small").textValue());
-                book.setPublisher(publish);
-                exchange.getIn().setBody(simple("${null}"));
-                exchange.getIn().setBody(book);
-                exchange.setProperty("authors", authorsOpen);
-              }
-            }).to("direct:savebook").end();
+            .process(bookOpenLibraryProcessor).to("direct:savebook").end();
 
-        from("direct:savebook").streamCaching().bean(this.bookService, "saveBook").process(
-            new Processor() {
-              @Override
-              public void process(Exchange exchange) throws Exception {
-                Book book = (Book)exchange.getIn().getBody();
-                BookDto bookInput = new BookDto(book);
-                List<String> authors = (List<String>) exchange.getProperty("authors");
-                bookInput.setAuthors(authors);
-                exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
-                exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, 201);
-                exchange.getIn().setBody(bookInput);
-              }
-            }).end();
+        from("direct:savebook").streamCaching().bean(this.bookService, "saveBook")
+            .process(saveBookprocessor).end();
 
         from("direct:booknotfound").process(new Processor() {
           @Override
