@@ -173,7 +173,6 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.userService, "deleteBook")
-            .endRest()
 
         .get("/books/{isbn}")
             .description("allows you to search for a book according to ISBN")
@@ -219,5 +218,13 @@ public class BookRoute extends RouteBuilder {
             exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, 404);
           }
         }).end();
+    
+    from("direct:users").bean(this.userService, "getAllUser");
+        from("direct:books").bean(this.bookService, "getAllBook");
+        from("direct:booksearch").bean(this.bookService, "findBookById");
+        from("direct:updatebook").bean(this.bookService, "updateBook");
+        from("direct:savebook").bean(this.bookService, "saveBook");
+        from("direct:saveUser").bean(this.userService, "saveUser");
+        from("direct:usersearch").bean(this.userService, "findUserById");
   }
 }

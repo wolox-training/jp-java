@@ -44,4 +44,6 @@ dependencies {
     annotationProcessor "org.projectlombok:lombok:1.18.6"
     compile group: 'com.google.guava', name: 'guava', version: '27.0-jre'
     compile group: 'org.apache.camel', name: 'camel-swagger-java', version: '2.24.1'
+    testCompile group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
+    testCompile group: 'org.apache.camel', name: 'camel-test-spring', version: '2.24.1'
 }
