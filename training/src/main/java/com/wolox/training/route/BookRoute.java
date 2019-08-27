@@ -4,11 +4,16 @@ import com.wolox.training.exceptions.BookNotFoundException;
 import com.wolox.training.exceptions.UserNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
+import com.wolox.training.processor.BookResponseProcessor;
 import com.wolox.training.processor.ErrorProcessorBook;
 import com.wolox.training.processor.ErrorProcessorUser;
+import com.wolox.training.processor.SaveBookprocessor;
+import com.wolox.training.processor.BookOpenLibraryProcessor;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
+import com.wolox.training.utils.AppConstants;
 import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.cdi.ContextName;
 import org.apache.camel.model.rest.RestBindingMode;
@@ -25,6 +30,15 @@ public class BookRoute extends RouteBuilder {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private BookOpenLibraryProcessor bookOpenLibraryProcessor;
+
+  @Autowired
+  private SaveBookprocessor saveBookprocessor;
+
+  @Autowired
+  private BookResponseProcessor bookResponseProcessor;
 
   @Override
   public void configure() throws Exception {
@@ -159,9 +173,53 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.userService, "deleteBook")
-            .endRest();
 
-        from("direct:users").bean(this.userService, "getAllUser");
+        .get("/books/{isbn}")
+            .description("allows you to search for a book according to ISBN")
+            .param().name("isbn").type(RestParamType.path).description("ISBN of the book")
+            .dataType("string").endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(201).message("created").endResponseMessage()
+            .responseMessage().code(404).message("Not found").endResponseMessage()
+            .route()
+            .streamCaching().bean(this.bookService, "findBookByIsbn")
+            .choice()
+                .when(simple("${body?.isbn} == null"))
+                    .to("direct:createbook")
+                .otherwise()
+                    .to("direct:resultsearchbook")
+            .end().endRest();
+
+        from("direct:resultsearchbook").streamCaching().process(bookResponseProcessor).end();
+
+        from("direct:createbook")
+            .setHeader(Exchange.HTTP_QUERY, simple("bibkeys=ISBN:${header.isbn}&format=json&jscmd=data"))
+            .setProperty("isbnbook", simple("${header.isbn}"))
+            .removeHeader(Exchange.HTTP_PATH).streamCaching()
+            .to(AppConstants.OPEN_LIBRARY_URL)
+            .convertBodyTo(String.class)
+            .choice()
+            .when(body().isEqualTo("{}"))
+                .to("direct:booknotfound")
+            .otherwise()
+                .to("direct:saveopenlibrary")
+            .end().endRest();
+
+        from("direct:saveopenlibrary")
+            .process(bookOpenLibraryProcessor).to("direct:savebook").end();
+
+        from("direct:savebook").streamCaching().bean(this.bookService, "saveBook")
+            .process(saveBookprocessor).end();
+
+        from("direct:booknotfound").process(new Processor() {
+          @Override
+          public void process(Exchange exchange) throws Exception {
+            exchange.getIn().setHeader(Exchange.CONTENT_TYPE, "application/json");
+            exchange.getIn().setHeader(Exchange.HTTP_RESPONSE_CODE, 404);
+          }
+        }).end();
+    
+    from("direct:users").bean(this.userService, "getAllUser");
         from("direct:books").bean(this.bookService, "getAllBook");
         from("direct:booksearch").bean(this.bookService, "findBookById");
         from("direct:updatebook").bean(this.bookService, "updateBook");
