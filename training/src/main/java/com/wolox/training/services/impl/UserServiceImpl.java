@@ -8,6 +8,7 @@ import com.wolox.training.models.User;
 import com.wolox.training.repositories.BookRepository;
 import com.wolox.training.repositories.UserRepository;
 import com.wolox.training.services.UserService;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Header;
@@ -81,5 +82,14 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
     user.addBook(book);
     this.userRepository.save(user);
+  }
+
+  @Override
+  public List<User> getUserByBirthdateAndName(@Header("before") String before,
+      @Header("after") String after, @Header("name") String name) {
+    System.out.println(after);
+    System.out.println(before);
+    return this.userRepository.findByBirthdateAndNameIgnoreCaseSensative(LocalDate.parse(before),
+        LocalDate.parse(after), name);
   }
 }
