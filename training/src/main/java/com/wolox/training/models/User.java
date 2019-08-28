@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Entity
 @Getter
@@ -42,6 +43,11 @@ public class User {
 
   @Column(nullable = false)
   private LocalDate birthdate;
+
+  @Column(nullable = false)
+  private String password;
+
+  private String role;
 
   public User() {
     this.books = new ArrayList<>();
@@ -93,5 +99,9 @@ public class User {
     Preconditions.checkArgument(name != null && !name.isEmpty(),
         "the birthdate " + AppConstants.PRECONDITION_USER_MESSAGE_NULL);
     this.birthdate = birthdate;
+  }
+
+  public void setPassword(String password) {
+    this.password = new BCryptPasswordEncoder().encode(password);
   }
 }
