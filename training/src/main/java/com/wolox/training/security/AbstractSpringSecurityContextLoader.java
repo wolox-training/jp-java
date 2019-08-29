@@ -1,6 +1,6 @@
 package com.wolox.training.security;
 
-import com.wolox.training.exceptions.IllegalArgumentBookException;
+import com.wolox.training.exceptions.AuthenticationException;
 import com.wolox.training.utils.HttpUtil;
 import javax.security.auth.Subject;
 import org.apache.camel.Exchange;
@@ -10,14 +10,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 public class AbstractSpringSecurityContextLoader {
 
   protected void handledRequest(String authHeader, Exchange exchange, AuthenticationProvider authProvider)
-      throws IllegalArgumentBookException {
+      throws AuthenticationException {
 
     if (authHeader == null) {
-      throw new IllegalArgumentBookException("an error occurred when decoding the request token", 500);
+      throw new AuthenticationException("no authorization data was found in the request", 500);
     }
 
    if (authProvider == null) {
-     throw new IllegalArgumentBookException("An error occurred while trying to authenticate the requesting user with the service", 500);
+     throw new AuthenticationException("no validation provider found", 500);
    }
     String[] usernameAndPassword = HttpUtil.authorizationHeader(authHeader);
 
@@ -25,7 +25,7 @@ public class AbstractSpringSecurityContextLoader {
     try {
       usernamePasswordAuthenticationToken = handleAuthentication(usernameAndPassword, exchange, authProvider);
     } catch (Exception e) {
-      throw new IllegalArgumentBookException("an error occurred authenticating the user",500);
+      throw new AuthenticationException("problems with user authentication", 401);
     }
 
     Subject subject = new Subject();

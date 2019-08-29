@@ -53,7 +53,7 @@ public class BookRoute extends RouteBuilder {
     onException(UserNotFoundException.class).handled(true)
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessorUser());
 
-    onException(IllegalArgumentBookException.class, BadCredentialsException.class)
+    onException(IllegalArgumentBookException.class)
         .handled(true).transform()
         .simple("${exception.message}")
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
@@ -62,7 +62,12 @@ public class BookRoute extends RouteBuilder {
     onException(CamelAuthorizationException.class).handled(true).transform()
         .simple("access denied for security reasons ${exception.policyId}")
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
-        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("500"));
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("401"));
+
+    onException(BadCredentialsException.class).handled(true).transform()
+        .simple("Problems with Request Authorization Credentials ${exception.message}")
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("401"));
 
     restConfiguration()
 

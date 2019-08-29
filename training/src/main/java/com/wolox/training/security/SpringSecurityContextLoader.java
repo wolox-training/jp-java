@@ -1,5 +1,6 @@
 package com.wolox.training.security;
 
+import com.wolox.training.exceptions.AuthenticationException;
 import com.wolox.training.exceptions.IllegalArgumentBookException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Header;
@@ -15,7 +16,7 @@ public class SpringSecurityContextLoader extends AbstractSpringSecurityContextLo
   private BookAuthenticationProvider authenticationProvider;
 
   public void process(@Header("Authorization") String authHeader, Exchange exchange)
-      throws IllegalArgumentBookException {
+      throws AuthenticationException {
     super.handledRequest(authHeader, exchange, authenticationProvider);
   }
 

@@ -5,6 +5,11 @@ import org.apache.commons.lang3.StringUtils;
 
 public class HttpUtil {
 
+  /**
+   * @param header HTTP Authorization header
+   * @return A String[] with 2 elements: 1st element == username, 2nd element == password,
+   * coming from the request in the form: user:password
+   */
   public static String[] authorizationHeader(String header) {
     if (Strings.isNullOrEmpty(header)) {
       return null;
