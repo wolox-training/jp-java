@@ -11,7 +11,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
   User findFirstByUsername(String userName);
 
-  @Query("SELECT T FROM User T WHERE (T.birthdate > cast(:before as date)) and (T.birthdate < cast(:after as date)) and (T.name like %:name%)")
+  @Query("SELECT T FROM User T WHERE (T.birthdate <:before or cast(:before as date) is null) and "
+      + "(T.birthdate>:after or cast(:after as date) is null) and (T.name like %:name% or :name is null)")
   List<User> findByBirthdateAndNameIgnoreCaseSensative(@Param("after") LocalDate after,
       @Param("before") LocalDate before, @Param("name") String name);
 }
