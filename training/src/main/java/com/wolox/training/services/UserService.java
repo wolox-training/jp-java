@@ -24,4 +24,6 @@ public interface UserService {
       throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException;
 
   String getUserAuthenticated();
+
+  List<User> getUserByBirthdateAndName(String before, String after, String name);
 }
