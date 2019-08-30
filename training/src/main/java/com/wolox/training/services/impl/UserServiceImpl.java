@@ -89,9 +89,8 @@ public class UserServiceImpl implements UserService {
   @Override
   public List<User> getUserByBirthdateAndName(@Header("after") String after,
       @Header("before") String before, @Header("name") String name,
-      @Header("page") Integer page, @Header("sort") String sort) {
-    System.out.println(before);
+      @Header("page") Integer page, @Header("sort") String sort, @Header("pagesize") Integer pageSize) {
     return this.userRepository.findByBirthdateAndNameIgnoreCaseSensative(LocalDate.parse(before),
-        LocalDate.parse(after), name, PageRequest.of(page, 2, Sort.by(sort)));
+        LocalDate.parse(after), name, PageRequest.of(page, pageSize, Sort.by(sort)));
   }
 }

@@ -251,6 +251,8 @@ public class BookRoute extends RouteBuilder {
             .defaultValue("0").dataType("integer").required(false).endParam()
             .param().name("sort").type(RestParamType.query).description("order param")
             .defaultValue("id").dataType("string").required(false).endParam()
+            .param().name("pagesize").type(RestParamType.query).description("page size")
+            .defaultValue("2").dataType("string").required(false).endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("user not found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
