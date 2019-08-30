@@ -1,6 +1,7 @@
 package com.wolox.training.route;
 
 import com.wolox.training.exceptions.BookNotFoundException;
+import com.wolox.training.exceptions.IllegalArgumentBookException;
 import com.wolox.training.exceptions.UserNotFoundException;
 import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
@@ -9,9 +10,11 @@ import com.wolox.training.processor.ErrorProcessorBook;
 import com.wolox.training.processor.ErrorProcessorUser;
 import com.wolox.training.processor.SaveBookprocessor;
 import com.wolox.training.processor.BookOpenLibraryProcessor;
+import com.wolox.training.security.SpringSecurityContextLoader;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
 import com.wolox.training.utils.AppConstants;
+import org.apache.camel.CamelAuthorizationException;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
@@ -19,6 +22,7 @@ import org.apache.camel.cdi.ContextName;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.apache.camel.model.rest.RestParamType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -49,6 +53,22 @@ public class BookRoute extends RouteBuilder {
     onException(UserNotFoundException.class).handled(true)
         .setHeader(Exchange.CONTENT_TYPE, constant("text/plain")).process(new ErrorProcessorUser());
 
+    onException(IllegalArgumentBookException.class)
+        .handled(true).transform()
+        .simple("${exception.message}")
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("500"));
+
+    onException(CamelAuthorizationException.class).handled(true).transform()
+        .simple("access denied for security reasons ${exception.policyId}")
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("401"));
+
+    onException(BadCredentialsException.class).handled(true).transform()
+        .simple("Problems with Request Authorization Credentials ${exception.message}")
+        .setHeader(Exchange.CONTENT_TYPE, constant("text/plain"))
+        .setHeader(Exchange.HTTP_RESPONSE_CODE, constant("401"));
+
     restConfiguration()
 
         .bindingMode(RestBindingMode.json)
@@ -69,8 +89,10 @@ public class BookRoute extends RouteBuilder {
             .description("allows you to consult all the books")
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no books found").endResponseMessage()
-            .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.bookService, "getAllBook")
+            .responseMessage().code(500).message("error generating query").endResponseMessage()
+            .route().bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.bookService, "getAllBook")
             .endRest()
 
         .get("/books/{id}")
@@ -80,7 +102,9 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no books found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.bookService, "findBookById")
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.bookService, "findBookById")
             .endRest()
 
         .post("/books")
@@ -96,7 +120,10 @@ public class BookRoute extends RouteBuilder {
             .dataType("long").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.bookService, "deleteBook")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.bookService, "deleteBook")
             .endRest()
 
         .put("/books/{id}")
@@ -106,7 +133,10 @@ public class BookRoute extends RouteBuilder {
             .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.bookService, "updateBook")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.bookService, "updateBook")
             .endRest()
 
         .get("/users")
@@ -114,7 +144,9 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no users found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.userService, "getAllUser")
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "getAllUser")
             .endRest()
 
         .get("/users/{id}")
@@ -124,7 +156,9 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(404).message("no user found").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage().route()
-            .streamCaching().bean(this.userService, "findUserById")
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "findUserById")
             .endRest()
 
         .post("/users")
@@ -140,7 +174,10 @@ public class BookRoute extends RouteBuilder {
             .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.userService, "deleteUser")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "deleteUser")
             .endRest()
 
         .put("/users/{id}")
@@ -150,7 +187,10 @@ public class BookRoute extends RouteBuilder {
             .dataType("long").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.userService, "updateUser")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "updateUser")
             .endRest()
 
         .put("/users/{iduser}/books/{idbook}")
@@ -161,7 +201,10 @@ public class BookRoute extends RouteBuilder {
             .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.userService, "addBook")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "addBook")
             .endRest()
 
         .delete("/users/{iduser}/books/{idbook}")
@@ -172,9 +215,12 @@ public class BookRoute extends RouteBuilder {
             .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-            .route().streamCaching().bean(this.userService, "deleteBook")
+            .route()
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.userService, "deleteBook")
             .endRest()
-
+            
         .get("/books/{isbn}")
             .description("allows you to search for a book according to ISBN")
             .param().name("isbn").type(RestParamType.path).description("ISBN of the book")
@@ -183,7 +229,9 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(201).message("created").endResponseMessage()
             .responseMessage().code(404).message("Not found").endResponseMessage()
             .route()
-            .streamCaching().bean(this.bookService, "findBookByIsbn")
+            .bean(SpringSecurityContextLoader.class)
+            .policy("authenticated_admin")
+            .bean(this.bookService, "findBookByIsbn")
             .choice()
                 .when(simple("${body?.isbn} == null"))
                     .to("direct:createbook")
