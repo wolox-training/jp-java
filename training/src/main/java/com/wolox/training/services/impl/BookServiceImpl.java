@@ -64,4 +64,10 @@ public class BookServiceImpl implements BookService {
     return this.bookRepository.findByIsbn(isbn)
         .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
   }
+
+  @Override
+  public List<Book> findBookByPublisherAndGenreAndYear(@Header("publisher") String publisher,
+      @Header("genre") String genre, @Header("year") String year) {
+    return this.bookRepository.findByPublisherAndGenreAndYear(publisher, genre, year);
+  }
 }

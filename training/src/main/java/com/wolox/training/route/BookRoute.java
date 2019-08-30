@@ -215,7 +215,6 @@ public class BookRoute extends RouteBuilder {
             .dataType("integer").endParam()
             .responseMessage().code(200).message("OK").endResponseMessage()
             .responseMessage().code(500).message("error generating query").endResponseMessage()
-
             .route()
             .bean(SpringSecurityContextLoader.class)
             .policy("authenticated_admin")
@@ -238,7 +237,36 @@ public class BookRoute extends RouteBuilder {
                     .to("direct:createbook")
                 .otherwise()
                     .to("direct:resultsearchbook")
-            .end().endRest();
+            .end().endRest()
+
+        .get("/users/search/")
+            .description("allows you to search between a range of birth dates and a name")
+            .param().name("before").type(RestParamType.query).description("date before")
+            .dataType("string").required(false).endParam()
+            .param().name("after").type(RestParamType.query).description("date after")
+            .dataType("string").required(false).endParam()
+            .param().name("name").type(RestParamType.query).description("name user")
+            .dataType("string").required(false).endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(404).message("user not found").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage()
+            .route().streamCaching().bean(this.userService, "getUserByBirthdateAndName")
+            .endRest()
+
+        .get("/books/search")
+            .description("allows you to search for a book by publisher, genre and year")
+            .param().name("publisher").type(RestParamType.query).description("publisher book")
+            .dataType("string").required(false).endParam()
+            .param().name("genre").type(RestParamType.query).description("genre book")
+            .dataType("string").required(false).endParam()
+            .param().name("year").type(RestParamType.query).description("year book")
+            .dataType("string").required(false).endParam()
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .responseMessage().code(404).message("book not found").endResponseMessage()
+            .responseMessage().code(500).message("error generating query").endResponseMessage()
+            .route().streamCaching().bean(this.bookService, "findBookByPublisherAndGenreAndYear")
+            .endRest();
+
 
         from("direct:resultsearchbook").streamCaching().process(bookResponseProcessor).end();
 
@@ -256,9 +284,9 @@ public class BookRoute extends RouteBuilder {
             .end().endRest();
 
         from("direct:saveopenlibrary")
-            .process(bookOpenLibraryProcessor).to("direct:savebook").end();
+            .process(bookOpenLibraryProcessor).to("direct:savebookfromlibrary").end();
 
-        from("direct:savebook").streamCaching().bean(this.bookService, "saveBook")
+        from("direct:savebookfromlibrary").streamCaching().bean(this.bookService, "saveBook")
             .process(saveBookprocessor).end();
 
         from("direct:booknotfound").process(new Processor() {
@@ -269,7 +297,7 @@ public class BookRoute extends RouteBuilder {
           }
         }).end();
     
-    from("direct:users").bean(this.userService, "getAllUser");
+        from("direct:users").bean(this.userService, "getAllUser");
         from("direct:books").bean(this.bookService, "getAllBook");
         from("direct:booksearch").bean(this.bookService, "findBookById");
         from("direct:updatebook").bean(this.bookService, "updateBook");
