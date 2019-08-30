@@ -11,6 +11,7 @@ import com.wolox.training.processor.ErrorProcessorUser;
 import com.wolox.training.processor.SaveBookprocessor;
 import com.wolox.training.processor.BookOpenLibraryProcessor;
 import com.wolox.training.security.SpringSecurityContextLoader;
+import com.wolox.training.security.UserAuthentication;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
 import com.wolox.training.utils.AppConstants;
@@ -238,7 +239,12 @@ public class BookRoute extends RouteBuilder {
                     .to("direct:createbook")
                 .otherwise()
                     .to("direct:resultsearchbook")
-            .end().endRest();
+            .end().endRest()
+
+        .get("/username")
+            .description("allows you to obtain the name of the authorized user")
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .route().streamCaching().bean(this.userService, "getUserAuthenticated").endRest();
 
         from("direct:resultsearchbook").streamCaching().process(bookResponseProcessor).end();
 
@@ -256,9 +262,9 @@ public class BookRoute extends RouteBuilder {
             .end().endRest();
 
         from("direct:saveopenlibrary")
-            .process(bookOpenLibraryProcessor).to("direct:savebook").end();
+            .process(bookOpenLibraryProcessor).to("direct:savebookfromlibrary").end();
 
-        from("direct:savebook").streamCaching().bean(this.bookService, "saveBook")
+        from("direct:savebookfromlibrary").streamCaching().bean(this.bookService, "saveBook")
             .process(saveBookprocessor).end();
 
         from("direct:booknotfound").process(new Processor() {

@@ -7,6 +7,7 @@ import com.wolox.training.models.Book;
 import com.wolox.training.models.User;
 import com.wolox.training.repositories.BookRepository;
 import com.wolox.training.repositories.UserRepository;
+import com.wolox.training.security.AuthenticationService;
 import com.wolox.training.services.UserService;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,9 @@ public class UserServiceImpl implements UserService {
 
   @Autowired
   private BookRepository bookRepository;
+
+  @Autowired
+  private AuthenticationService authenticationService;
 
   @Override
   public List<User> getAllUser() {
@@ -81,5 +85,10 @@ public class UserServiceImpl implements UserService {
         .orElseThrow(() -> new BookNotFoundException("Book not found", 404));
     user.addBook(book);
     this.userRepository.save(user);
+  }
+
+  @Override
+  public String getUserAuthenticated() {
+    return this.authenticationService.getAuthentication().getName();
   }
 }

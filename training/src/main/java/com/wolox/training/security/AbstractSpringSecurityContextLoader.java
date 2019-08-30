@@ -6,6 +6,7 @@ import javax.security.auth.Subject;
 import org.apache.camel.Exchange;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 public class AbstractSpringSecurityContextLoader {
 
@@ -30,6 +31,8 @@ public class AbstractSpringSecurityContextLoader {
 
     Subject subject = new Subject();
     subject.getPrincipals().add(usernamePasswordAuthenticationToken);
+
+    SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
 
     exchange.getIn().setHeader(Exchange.AUTHENTICATION, subject);
   }

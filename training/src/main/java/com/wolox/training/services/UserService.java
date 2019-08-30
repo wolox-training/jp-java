@@ -22,4 +22,6 @@ public interface UserService {
 
   void addBook(Long idUser, Long idBook)
       throws UserNotFoundException, BookNotFoundException, BookAlreadyOwnedException;
+
+  String getUserAuthenticated();
 }
