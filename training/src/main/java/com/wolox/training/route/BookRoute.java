@@ -11,6 +11,7 @@ import com.wolox.training.processor.ErrorProcessorUser;
 import com.wolox.training.processor.SaveBookprocessor;
 import com.wolox.training.processor.BookOpenLibraryProcessor;
 import com.wolox.training.security.SpringSecurityContextLoader;
+import com.wolox.training.security.UserAuthentication;
 import com.wolox.training.services.BookService;
 import com.wolox.training.services.UserService;
 import com.wolox.training.utils.AppConstants;
@@ -239,6 +240,11 @@ public class BookRoute extends RouteBuilder {
                     .to("direct:resultsearchbook")
             .end().endRest()
 
+        .get("/username")
+            .description("allows you to obtain the name of the authorized user")
+            .responseMessage().code(200).message("OK").endResponseMessage()
+            .route().streamCaching().bean(this.userService, "getUserAuthenticated").endRest();
+
         .get("/users/search/")
             .description("allows you to search between a range of birth dates and a name")
             .param().name("before").type(RestParamType.query).description("date before")
@@ -272,7 +278,6 @@ public class BookRoute extends RouteBuilder {
             .responseMessage().code(500).message("error generating query").endResponseMessage()
             .route().streamCaching().bean(this.bookService, "findBookByPublisherAndGenreAndYear")
             .endRest();
-
 
         from("direct:resultsearchbook").streamCaching().process(bookResponseProcessor).end();
 
