@@ -14,6 +14,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Header;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -93,9 +95,9 @@ public class UserServiceImpl implements UserService {
     return this.authenticationService.getAuthentication().getName();
 
   public List<User> getUserByBirthdateAndName(@Header("after") String after,
-      @Header("before") String before, @Header("name") String name) {
-    System.out.println(before);
+      @Header("before") String before, @Header("name") String name,
+      @Header("page") Integer page, @Header("sort") String sort, @Header("pagesize") Integer pageSize) {
     return this.userRepository.findByBirthdateAndNameIgnoreCaseSensative(LocalDate.parse(before),
-        LocalDate.parse(after), name);
+        LocalDate.parse(after), name, PageRequest.of(page, pageSize, Sort.by(sort)));
   }
 }
