@@ -25,8 +25,6 @@ public interface UserService {
 
   String getUserAuthenticated();
 
-  List<User> getUserByBirthdateAndName(String before, String after, String name);
-
   List<User> getUserByBirthdateAndName(String before, String after, String name, Integer page,
       String sort, Integer pageSize);
 }
