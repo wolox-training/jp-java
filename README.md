@@ -1,2 +1,2 @@
 # jp-java
-Java Training Repository for Jhovanny Andres Cañas Pino
+Java Training Repository
